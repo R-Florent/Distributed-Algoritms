@@ -1,10 +1,10 @@
 import numpy as np
 
-A = np.array([[4, 1, 2],
-              [3, 5, 1],
-              [1, 1, 3]])
+A = np.array([[1325, 5245, 4345345],
+              [5, -44343, -40001],
+              [1, 408, 4]])
 
-b = np.array([4, 7, 3])
+b = np.array([10, -2, 30])
 
 x = np.random.rand(3)  # x1, x2, x3 initialisés aléatoirement
 
@@ -33,7 +33,7 @@ def KacZmarg(matrice_A, matrice_b, inconnue):
 
         # Critère de convergence (tolérance)
         if np.linalg.norm(np.array(inconnue) - np.array(x_old)) < tolerance:
-            print(f"Convergence atteinte après {iteration + 1} itérations.")
+            print(f"Convergence atteinte après {iteration + 1} loop.")
             break
 
     return inconnue
