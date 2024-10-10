@@ -1,45 +1,60 @@
 import numpy as np
 
-A = np.array([[1325, 5245, 4345345],
-              [5, -44343, -40001],
-              [1, 408, 4]])
+# Matrix A and vector b
+A = np.array([[4, 1, 2],
+              [3, 5, 1],
+              [1, 1, 3]])
 
-b = np.array([10, -2, 30])
+b = np.array([4, 7, 3])
 
-x = np.random.rand(3)  # x1, x2, x3 initialisés aléatoirement
+# Random initialization of vector x
+x = np.random.rand(3)
 
-# Paramètres pour l'algorithme itératif
+# Parameters for the algorithm
 tolerance = 1e-6
-max_iterations = 1000
+max_iterations = 10000
 alpha = 0.9
 
-print("Initial value of unknowns:", x)
+def KacZmarz(matrice_A, matrice_b, inconnue):
+    # use the formule of KacZmarz methode
+    for equation in enumerate(matrice_A):
+        Transpose_a = 0
+        Norm = 0
+        for i,element in enumerate(equation):
+            Transpose_a += element * inconnue[i]  # Scalaire product of a and x ligne
+            Norm += element * element  # Norm of vector
+
+        # Mise à jour selon l'algorithme de Kaczmarz
+        atixi = (matrice_b - Transpose_a) / Norm
+        for i,element in enumerate(equation):
+            inconnue[i] = inconnue[i] + atixi * element
+        #return a vectore of x for 1 equation
+        return inconnue
+
+def KacZmarz_projection(matrice_A, matrice_b, inconnue):
+    resultats = []
+    for i in range(len(x)):
+        resultats.append(KacZmarz(matrice_A[i], matrice_b[i],inconnue))
+
+    resultats_array = np.array(resultats)
+    average = np.mean(resultats_array, axis=0)
+    return average
+
+i = 0
+
+while True:
+    for i in range(len(x)):
+        KacZmarz(A[i], b[i], x)
+
+    print("pour valeur de x depart",x,"valer du vecteur ",A[0],"est valeur du resultat",b[0])
+    print("la formule retourne comme valeur de x",KacZmarz(A[0], b, x))
+    i += 1
+
+    if i >= max_iterations:
+        break
+
+#%%
 
 
-def KacZmarg(matrice_A, matrice_b, inconnue):
-    for iteration in range(max_iterations):
-        x_old = inconnue.copy()  # Copie de l'ancienne solution
-        for indise, equation in enumerate(matrice_A):
-            transposer_a = 0
-            norme = 0
-            for j, element in enumerate(equation):
-                transposer_a += element * inconnue[j]  # Produit scalaire de la ligne et de x
-                norme += element * element  # Norme de la ligne
-
-            # Mise à jour selon l'algorithme de Kaczmarz
-            atixi = (matrice_b[indise] - transposer_a) / norme
-            for j, element in enumerate(equation):
-                inconnue[j] = inconnue[j] + atixi * element
-
-        # Critère de convergence (tolérance)
-        if np.linalg.norm(np.array(inconnue) - np.array(x_old)) < tolerance:
-            print(f"Convergence atteinte après {iteration + 1} loop.")
-            break
-
-    return inconnue
-
-
-# Exécution de l'algorithme
-resulte = KacZmarg(A, b, x)
-
-print("Solution approchée:", resulte)
+#%%
+print(A[0], b, x)
