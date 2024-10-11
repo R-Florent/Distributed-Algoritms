@@ -15,6 +15,7 @@ tolerance = 1e-6
 max_iterations = 10000
 alpha = 0.9
 
+#fait la formule de kacmarz pour rouver 1x
 def KacZmarz(matrice_A, matrice_b, inconnue):
     # use the formule of KacZmarz methode
     for equation in enumerate(matrice_A):
@@ -54,7 +55,5 @@ while True:
         break
 
 #%%
-
-
-#%%
 print(A[0], b, x)
+print(KacZmarz(A[0], b, x))
