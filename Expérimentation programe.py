@@ -55,5 +55,43 @@ while True:
         break
 
 #%%
-print(A[0], b, x)
-print(KacZmarz(A[0], b, x))
+import numpy as np
+
+# Matrix A and vector b
+A = np.array([[4, 1, 2],
+              [3, 5, 1],
+              [1, 1, 3]])
+
+b = np.array([4, 7, 3])
+
+# Random initialization of vector x
+x = np.random.rand(3)
+
+# Parameters for the algorithm
+tolerance = 1e-6
+max_iterations = 10000
+alpha = 0.9
+
+#fait la formule de kacmarz pour rouver 1x
+def KacZmarz(matrice_A, matrice_b, inconnue):
+    Transpose_a = 0
+    Norm = 0
+    for i,A in enumerate(matrice_A):
+        Transpose_a += A * inconnue[i]
+        Norm += A * A
+
+    atixi = (matrice_b - Transpose_a) / Norm
+    for i,A in enumerate(matrice_A):
+        inconnue[i] = inconnue[i] + atixi * A
+    return inconnue
+
+def kaxZmarz():
+    all_inconnue = []
+    for i in range(len(x)):
+        all_inconnue.append(KacZmarz(A[i], b[i], x))
+    for ligne in range(len(all_inconnue[0])):
+        #for inco in range(len(inconnue_average[0])):
+        print(all_inconnue[ligne])
+
+
+kaxZmarz()
