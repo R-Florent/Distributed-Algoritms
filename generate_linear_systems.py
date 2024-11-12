@@ -42,15 +42,17 @@ for size in range(3, 3 + taille_de_la_matrice):
     systems = generate_linear_systems(nombre_de_matrice, matrix_size=size)
     all_systems.extend(systems)  # Ajouter les systèmes validés à la liste totale
 
-# Affichage des systèmes générés et stockage dans un fichier JSON
-for i, system in enumerate(all_systems):
-    print(f"Système {i + 1}:")
-    print("A =\n", np.array(system["A"]))
-    print("b =", system["b"])
-    print("-" * 30)
-
 # Stockage de tous les systèmes valides dans un fichier JSON
 with open("systems_data.json", "w") as f:
-    json.dump(all_systems, f, indent=4)
+    formatted_systems = []
+    for system in all_systems:
+        formatted_systems.append({
+            "A": system["A"],
+            "b": system["b"]
+        })
+    json_str = json.dumps(formatted_systems, indent=4)
+    json_str = json_str.replace("[\n                ", "[").replace("\n            ],", "],")
+    json_str = json_str.replace(",\n                ", ", ")
+    f.write(json_str)
 
 print("Les systèmes ont été stockés avec succès dans le fichier 'systems_data.json'.")
