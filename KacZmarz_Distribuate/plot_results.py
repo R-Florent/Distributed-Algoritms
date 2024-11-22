@@ -11,8 +11,8 @@ output_folder = "graphs"
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
-# Lire les systèmes de `systems_data.json`
-with open("systems_data.json", "r") as f:
+# Lire les systèmes de `systems_data_3x3.json`
+with open("Conditions_Number/systems_data_3x3.json", "r") as f:
     systems_data = json.load(f)
 
 # Paramètres globaux

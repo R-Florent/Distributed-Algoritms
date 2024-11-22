@@ -3,20 +3,20 @@ import json
 import os
 
 # Paramètres de génération
-nombre_de_matrice = 30
-taille_de_la_matrice = 15
+nombre_de_matrice = 100
+taille_de_la_matrice = 1
 
 # Création du dossier pour stocker les graphiques, si nécessaire
 if not os.path.exists("graphs"):
     os.makedirs("graphs")
 
-def generate_linear_systems(num_systems, matrix_size, min_val=-100, max_val=100):
+def generate_linear_systems(num_systems, matrix_size, min_val=-1, max_val=1):
     systems = []
     for _ in range(num_systems):
         # Génère une matrice A de taille `matrix_size` x `matrix_size` avec des valeurs aléatoires
-        A = np.random.randint(min_val, max_val, size=(matrix_size, matrix_size))
+        A = np.random.uniform(min_val, max_val, size=(matrix_size, matrix_size))
         # Génère un vecteur b de taille `matrix_size` avec des valeurs aléatoires
-        b = np.random.randint(min_val, max_val, size=(matrix_size,))
+        b = np.random.uniform(min_val, max_val, size=(matrix_size,))
 
         # Ajoute le système seulement s'il est valide
         if verifier_validite_systeme(A, b):
