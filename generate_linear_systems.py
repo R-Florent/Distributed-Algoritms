@@ -39,11 +39,11 @@ all_systems = []
 
 # Génération des systèmes linéaires pour chaque taille de matrice
 for size in range(3, 3 + taille_de_la_matrice):
-    systems = generate_linear_systems(nombre_de_matrice, matrix_size=size)
+    systems = generate_linear_systems(nombre_de_matrice, matrix_size=10)
     all_systems.extend(systems)  # Ajouter les systèmes validés à la liste totale
 
 # Stockage de tous les systèmes valides dans un fichier JSON
-with open("systems_data.json", "w") as f:
+with open("KacZmarz_Distribuate/Conditions_Number/systems_data_10x10.json", "w") as f:
     formatted_systems = []
     for system in all_systems:
         formatted_systems.append({
@@ -55,4 +55,4 @@ with open("systems_data.json", "w") as f:
     json_str = json_str.replace(",\n                ", ", ")
     f.write(json_str)
 
-print("Les systèmes ont été stockés avec succès dans le fichier 'systems_data.json'.")
+print("Les systèmes ont été stockés avec succès dans le fichier 'systems_data_3x3.json'.")
