@@ -44,8 +44,8 @@ def Kaczmarz(A, b):
 
     return x, max_iterations
 
-# Lire les systèmes de `systems_data_3x3.json`
-with open("Conditions_Number/systems_data_3x3.json", "r") as f:
+# Lire les systèmes
+with open("Conditions_Number/systems_data_3x3_to_10x10.json", "r") as f:
     systems_data = json.load(f)
 
 # Couleurs pour chaque taille de matrice
@@ -70,12 +70,7 @@ for idx, system in enumerate(systems_data):
     A = np.array(system["A"])
     b = np.array(system["b"])
     size = A.shape[0]
-
-    # Calcul du nombre de condition de A
-    eigenvalues = np.linalg.eigvals(A)
-    lambda_max = np.max(np.abs(eigenvalues))
-    lambda_min = np.min(np.abs(eigenvalues))
-    condition_number = lambda_max / lambda_min
+    condition_number = np.linalg.cond(A)
 
     # Mesurer le temps d'exécution de l'algorithme
     start_time = time.time()
@@ -85,10 +80,11 @@ for idx, system in enumerate(systems_data):
     execution_time = end_time - start_time
 
     # Stocker les résultats
-    condition_numbers.append(condition_number)
-    execution_times.append(execution_time)
-    matrix_sizes.append(size)
-    point_colors.append(colors[size])
+    if condition_number < 200:
+        condition_numbers.append(condition_number)
+        execution_times.append(execution_time)
+        matrix_sizes.append(size)
+        point_colors.append(colors[size])
 
     # Affichage des résultats
     print(f"Système {idx + 1}:")
@@ -112,9 +108,9 @@ for size in sorted(colors.keys()):
         alpha=0.7
     )
 
-plt.xlabel("Nombre de condition κ(A)")
-plt.ylabel("Temps d'exécution (secondes)")
-plt.title("Relation entre le nombre de condition κ(A) et le temps d'exécution")
-plt.legend(title="Taille de la matrice")
+plt.xlabel("Condition number κ(A)")
+plt.ylabel("Execution time (seconds)")
+plt.title("Relationship between the condition number κ(A) and execution time")
+plt.legend(title="Matrix size")
 plt.grid()
 plt.show()
