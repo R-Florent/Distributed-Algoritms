@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import time
 
-# Paramètres pour le dossier de sortie
+# Création du dossier pour les graphiques
 output_folder = "graphs"
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
@@ -44,7 +44,7 @@ def Kaczmarz(A, b):
 
     return x, max_iterations
 
-# Lire les systèmes
+# Lire les systèmes depuis le fichier JSON
 with open("Conditions_Number/systems_data_3x3_to_10x10.json", "r") as f:
     systems_data = json.load(f)
 
@@ -60,11 +60,14 @@ colors = {
     10: "pink"
 }
 
-# Stocker les résultats pour le graphique
+# Stocker les résultats
 condition_numbers = []
 execution_times = []
-matrix_sizes = []  # Taille de la matrice pour colorer les points
+matrix_sizes = []  # Taille de la matrice
 point_colors = []  # Couleurs associées à chaque point
+
+# Regrouper les données pour le calcul des moyennes
+average_data = {size: {"condition_numbers": [], "execution_times": []} for size in colors.keys()}
 
 for idx, system in enumerate(systems_data):
     A = np.array(system["A"])
@@ -79,12 +82,16 @@ for idx, system in enumerate(systems_data):
 
     execution_time = end_time - start_time
 
-    # Stocker les résultats
+    # Stocker les résultats si le nombre de condition est acceptable
     if condition_number < 200:
         condition_numbers.append(condition_number)
         execution_times.append(execution_time)
         matrix_sizes.append(size)
         point_colors.append(colors[size])
+
+        # Ajouter les données pour le calcul des moyennes
+        average_data[size]["condition_numbers"].append(condition_number)
+        average_data[size]["execution_times"].append(execution_time)
 
     # Affichage des résultats
     print(f"Système {idx + 1}:")
@@ -94,10 +101,24 @@ for idx, system in enumerate(systems_data):
     print(f"Nombre de condition κ(A): {condition_number:.2f}")
     print(f"Temps d'exécution: {execution_time:.4f} secondes\n")
 
+# Calcul des moyennes
+average_condition_numbers = []
+average_execution_times = []
+matrix_sizes_avg = []
+
+for size in sorted(average_data.keys()):
+    if average_data[size]["condition_numbers"]:
+        avg_cond = np.mean(average_data[size]["condition_numbers"])
+        avg_time = np.mean(average_data[size]["execution_times"])
+
+        average_condition_numbers.append(avg_cond)
+        average_execution_times.append(avg_time)
+        matrix_sizes_avg.append(size)
+
 # Tracer le graphique
 plt.figure(figsize=(10, 6))
 
-# Tracer chaque point avec la couleur correspondant à la taille de la matrice
+# Points individuels
 for size in sorted(colors.keys()):
     indices = [i for i, s in enumerate(matrix_sizes) if s == size]
     plt.scatter(
@@ -107,6 +128,16 @@ for size in sorted(colors.keys()):
         label=f"{size}x{size}",
         alpha=0.7
     )
+
+# Courbe des moyennes
+plt.plot(
+    average_condition_numbers,
+    average_execution_times,
+    color="black",
+    linestyle="--",
+    marker="o",
+    label="Average"
+)
 
 plt.xlabel("Condition number κ(A)")
 plt.ylabel("Execution time (seconds)")
