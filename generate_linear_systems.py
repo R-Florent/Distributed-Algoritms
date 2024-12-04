@@ -7,8 +7,8 @@ nombre_de_matrice = 100
 taille_de_la_matrice = 7
 
 # Création du dossier pour stocker les graphiques, si nécessaire
-if not os.path.exists("graphs"):
-    os.makedirs("graphs")
+if not os.path.exists("ressource/graphs"):
+    os.makedirs("ressource/graphs")
 
 def generate_linear_systems(num_systems, matrix_size, min_val=-1, max_val=1):
     systems = []
@@ -43,7 +43,7 @@ for size in range(3, 3 + taille_de_la_matrice):
     all_systems.extend(systems)  # Ajouter les systèmes validés à la liste totale
 
 # Stockage de tous les systèmes valides dans un fichier JSON
-with open("KacZmarz_Distribuate/Conditions_Number/systems_data_3x3_to_10x10.json", "w") as f:
+with open("ressource/System_of_linear_equations/systems_data_3x3_to_10x10.json", "w") as f:
     formatted_systems = []
     for system in all_systems:
         formatted_systems.append({

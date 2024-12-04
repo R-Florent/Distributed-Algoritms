@@ -12,7 +12,7 @@ if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
 # Lire les systèmes de `systems_data_3x3.json`
-with open("Conditions_Number/systems_data_3x3.json", "r") as f:
+with open("../ressource/System_of_linear_equations/systems_data_3x3.json", "r") as f:
     systems_data = json.load(f)
 
 # Paramètres globaux
