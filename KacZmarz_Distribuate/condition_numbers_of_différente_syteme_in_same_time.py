@@ -45,7 +45,7 @@ def Kaczmarz(A, b):
     return x, max_iterations
 
 # Lire les systèmes depuis le fichier JSON
-with open("Conditions_Number/systems_data_3x3_to_10x10.json", "r") as f:
+with open("../ressource/System_of_linear_equations/systems_data_3x3_to_10x10.json", "r") as f:
     systems_data = json.load(f)
 
 # Couleurs pour chaque taille de matrice
@@ -93,13 +93,13 @@ for idx, system in enumerate(systems_data):
         average_data[size]["condition_numbers"].append(condition_number)
         average_data[size]["execution_times"].append(execution_time)
 
-    # Affichage des résultats
-    print(f"Système {idx + 1}:")
-    print(f"Taille de la matrice: {size}x{size}")
-    print(f"Solution: {solution}")
-    print(f"Nombre d'itérations: {iterations}")
-    print(f"Nombre de condition κ(A): {condition_number:.2f}")
-    print(f"Temps d'exécution: {execution_time:.4f} secondes\n")
+    # # Affichage des résultats
+    # print(f"Système {idx + 1}:")
+    # print(f"Taille de la matrice: {size}x{size}")
+    # print(f"Solution: {solution}")
+    # print(f"Nombre d'itérations: {iterations}")
+    # print(f"Nombre de condition κ(A): {condition_number:.2f}")
+    # print(f"Temps d'exécution: {execution_time:.4f} secondes\n")
 
 # Calcul des moyennes
 average_condition_numbers = []
@@ -129,19 +129,9 @@ for size in sorted(colors.keys()):
         alpha=0.7
     )
 
-# Courbe des moyennes
-plt.plot(
-    average_condition_numbers,
-    average_execution_times,
-    color="black",
-    linestyle="--",
-    marker="o",
-    label="Average"
-)
-
 plt.xlabel("Condition number κ(A)")
 plt.ylabel("Execution time (seconds)")
-plt.title("Relationship between the condition number κ(A) and execution time")
+plt.title("Relationship between the condition number κ(A) and execution time Kaczmarz")
 plt.legend(title="Matrix size")
 plt.grid()
 plt.show()
