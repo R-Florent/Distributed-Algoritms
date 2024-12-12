@@ -4,7 +4,7 @@ import json
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from Kaczmarz_Distribuate_V1 import Kaczmarz  # Importation de l'algorithme de résolution
+from all_algortyme.KacZmarz_Distribued.Kaczmarz_Distribuate_V1 import Kaczmarz  # Importation de l'algorithme de résolution
 
 # Paramètres pour le dossier de sortie
 output_folder = "graphs"
@@ -12,7 +12,7 @@ if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
 # Lire les systèmes de `systems_data_3x3.json`
-with open("../ressource/System_of_linear_equations/systems_data_3x3.json", "r") as f:
+with open("ressource/System_of_linear_equations/systems_data_3x3.json", "r") as f:
     systems_data = json.load(f)
 
 # Paramètres globaux

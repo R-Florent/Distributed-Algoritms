@@ -45,7 +45,7 @@ def Kaczmarz(A, b):
     return x, max_iterations
 
 # Lire les systèmes depuis le fichier JSON
-with open("../ressource/System_of_linear_equations/systems_data_3x3_to_10x10.json", "r") as f:
+with open("../../ressource/System_of_linear_equations/systems_data_3x3_to_10x10.json", "r") as f:
     systems_data = json.load(f)
 
 # Couleurs pour chaque taille de matrice
