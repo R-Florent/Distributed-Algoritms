@@ -61,8 +61,7 @@ def Kaczmarz(A, b, max_iterations=1000):
         if convergence(A, b, x):
             return x, iteration + 1
 
-    return x, max_iterations,iteration
+    return x, max_iterations,#iteration
 
-solution = Kaczmarz(A, b, 10000)
-
-print("Kaczmar solution",solution,"true solution",np.linalg.solve(A,b))
+#solution = Kaczmarz(A, b, 10000)
+#print("Kaczmar solution",solution,"true solution",np.linalg.solve(A,b))
