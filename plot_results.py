@@ -1,83 +1,105 @@
-# plot_results.py
-
 import json
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from all_algortyme.KacZmarz_Distribued.Kaczmarz_Distribuate_V1 import Kaczmarz  # Importation de l'algorithme de résolution
 
-# Paramètres pour le dossier de sortie
-output_folder = "graphs"
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
+def plot_system_analysis(systems_file, output_folder, num_repetitions, solver_algorithm):
+    """
+    Analyze and plot statistical results for solving systems of linear equations.
 
-# Lire les systèmes de `systems_data_3x3.json`
-with open("ressource/System_of_linear_equations/systems_data_3x3.json", "r") as f:
-    systems_data = json.load(f)
+    Parameters:
+        systems_file (str): Path to the JSON file containing linear systems.
+        output_folder (str): Directory where plots will be saved.
+        num_repetitions (int): Number of repetitions for each system.
+        solver_algorithm (function): Function used to solve Ax = b, must return a tuple (solution, iterations).
+    """
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
-# Paramètres globaux
-num_repetitions = 500  # Nombre de répétitions pour calculer la moyenne des itérations
-results = []
+    # Load systems data
+    with open(systems_file, "r") as f:
+        systems_data = json.load(f)
 
-# Calcul et génération des graphiques
-for idx, system in enumerate(systems_data):
-    A = np.array(system["A"])
-    b = np.array(system["b"])
-    taille_matrice = A.shape[0]
+    results = []
 
-    # Exécuter plusieurs répétitions pour obtenir le nombre moyen d'itérations
-    iterations_needed = [Kaczmarz(A, b)[1] for _ in range(num_repetitions)]
-    average_iterations = np.mean(iterations_needed)
-    std_dev_iterations = np.std(iterations_needed)
+    # Process each system
+    for idx, system in enumerate(systems_data):
+        A = np.array(system["A"])
+        b = np.array(system["b"])
+        matrix_size = A.shape[0]
+        condition_number = np.linalg.cond(A)  # Calculate the condition number
 
-    # Stocker les résultats avec les informations pertinentes
-    results.append({
-        "index": idx,
-        "matrix_size": taille_matrice,
-        "average_iterations": average_iterations,
-        "std_dev_iterations": std_dev_iterations
-    })
+        # Perform multiple repetitions to compute iterations statistics
+        iterations_needed = [solver_algorithm(A, b)[1] for _ in range(num_repetitions)]
+        average_iterations = np.mean(iterations_needed)
+        std_dev_iterations = np.std(iterations_needed)
 
-    # Création du texte du système pour le graphique
-    matrix_text = f"A = {A.tolist()}\n\nb = {b.tolist()}"
+        # Store results
+        results.append({
+            "index": idx,
+            "matrix_size": matrix_size,
+            "average_iterations": average_iterations,
+            "std_dev_iterations": std_dev_iterations,
+            "condition_number": condition_number
+        })
 
-    # Génération du graphique
-    plt.figure(figsize=(10, 6))
-    plt.plot(range(1, num_repetitions + 1), iterations_needed, label="Nombre d'itérations par essai", color='blue')
-    plt.axhline(average_iterations, color='red', linestyle='--', label=f"Moyenne = {average_iterations:.2f}")
-    plt.fill_between(
-        range(1, num_repetitions + 1),
-        average_iterations - std_dev_iterations,
-        average_iterations + std_dev_iterations,
-        color='gray', alpha=0.3,
-        label=f"Écart type = {std_dev_iterations:.2f}"
-    )
+        # Text of the matrix and b for the graph
+        matrix_text = f"A = {A.tolist()}\n\nb = {b.tolist()}\n\nCondition Number = {condition_number:.2f}"
 
-    # Affichage du système dans le graphique
-    plt.text(1.02, 0.5, matrix_text, transform=plt.gca().transAxes, fontsize=9,
-             verticalalignment='center', bbox=dict(facecolor='white', alpha=0.5))
+        # Generate the graph
+        plt.figure(figsize=(12, 8))
+        plt.plot(range(1, num_repetitions + 1), iterations_needed, label="Iterations per trial", color='blue')
+        plt.axhline(average_iterations, color='red', linestyle='--', label=f"Average = {average_iterations:.2f}")
+        plt.fill_between(
+            range(1, num_repetitions + 1),
+            average_iterations - std_dev_iterations,
+            average_iterations + std_dev_iterations,
+            color='gray', alpha=0.3,
+            label=f"Standard Deviation = {std_dev_iterations:.2f}"
+        )
 
-    # Ajout de titres et légendes
-    plt.xlabel("Essai")
-    plt.ylabel("Nombre d'itérations pour convergence")
-    plt.title(f"Système {idx + 1} : Analyse statistique des itérations")
-    plt.legend()
+        # Display matrix A, b, and condition number on the side
+        plt.text(1.02, 0.5, matrix_text, transform=plt.gca().transAxes, fontsize=9,
+                 verticalalignment='center', bbox=dict(facecolor='white', alpha=0.6))
 
-    # Sauvegarde du graphique
-    plt.savefig(f"{output_folder}/system_{idx + 1}_iterations.png")
-    plt.close()
+        # Titles and legend
+        plt.xlabel("Trial")
+        plt.ylabel("Iterations to Convergence")
+        plt.title(f"System {idx + 1}: Statistical Analysis of Iterations")
+        plt.legend()
 
-# Tri des résultats par taille de matrice et moyenne d'itérations
-results_sorted = sorted(results, key=lambda x: (x["matrix_size"], x["average_iterations"]))
+        # Save the graph
+        plt.savefig(f"{output_folder}/system_{idx + 1}_iterations.png")
+        plt.close()
 
-# Afficher les résultats triés et sauvegarder dans un nouveau fichier JSON
-for result in results_sorted:
-    print(f"Système {result['index'] + 1}: Taille de la matrice = {result['matrix_size']}, "
-          f"Nombre moyen d'itérations = {result['average_iterations']:.2f}, "
-          f"Écart type = {result['std_dev_iterations']:.2f}")
+    # Sort results by matrix size and average iterations
+    results_sorted = sorted(results, key=lambda x: (x["matrix_size"], x["average_iterations"]))
 
-# Sauvegarder les résultats triés dans un fichier JSON
-with open("sorted_systems_data.json", "w") as f:
-    json.dump(results_sorted, f, indent=4)
+    # Display sorted results and save to a JSON file
+    for result in results_sorted:
+        print(f"System {result['index'] + 1}: Matrix size = {result['matrix_size']}, "
+              f"Average iterations = {result['average_iterations']:.2f}, "
+              f"Standard deviation = {result['std_dev_iterations']:.2f}, "
+              f"Condition number = {result['condition_number']:.2f}")
 
-print("Les systèmes ont été traités, les graphiques générés et les résultats stockés dans 'sorted_systems_data.json'.")
+    with open(f"{output_folder}/sorted_results.json", "w") as f:
+        json.dump(results_sorted, f, indent=4)
+
+    print(f"Results have been processed, graphs generated, and stored in '{output_folder}/sorted_results.json'.")
+
+# Example usage
+if __name__ == "__main__":
+    from all_algortyme.KacZmarz_Distribued.Kaczmarz_Distribuate_V1 import Kaczmarz  # Replace with your solver
+
+    def custom_solver(A, b):
+        """
+        Wrapper for the Kaczmarz solver to return iterations.
+        """
+        return Kaczmarz(A, b)
+
+    # Parameters
+    systems_file = "ressource/System_of_linear_equations/systems_data_3x3.json"
+    output_folder = "graphs"
+    num_repetitions = 500
+
+    plot_system_analysis(systems_file, output_folder, num_repetitions, custom_solver)

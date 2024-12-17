@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import time
 
-from all_algortyme.KacZmarz_Distribued.Kaczmarz_Distribuate_V1 import Kaczmarz
+from all_algortyme.Algorithme_Gauss_Seidel_distribué.Gauss_Seidel_distribué import distributed_gauss_seidel
 
 # Création du dossier pour les graphiques
 output_folder = "graphs"
@@ -45,7 +45,7 @@ for idx, system in enumerate(systems_data):
 
     # Mesurer le temps d'exécution de l'algorithme
     start_time = time.time()
-    solution, iterations = Kaczmarz(A, b)
+    solution, iterations = distributed_gauss_seidel(A, b)
     end_time = time.time()
 
     execution_time = end_time - start_time
@@ -99,7 +99,7 @@ for size in sorted(colors.keys()):
 
 plt.xlabel("Condition number κ(A)")
 plt.ylabel("Execution time (seconds)")
-plt.title("Relationship between the condition number κ(A) and execution time Kaczmarz_Distributed")
+plt.title("Relationship between the condition number κ(A) and execution time distributed_gauss_seidel")
 plt.legend(title="Matrix size")
 plt.grid()
 plt.show()

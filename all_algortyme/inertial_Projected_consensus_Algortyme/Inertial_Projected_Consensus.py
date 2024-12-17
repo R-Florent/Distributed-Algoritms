@@ -1,32 +1,37 @@
 import json
 import numpy as np
 import time
-from numpy import linalg as LA
-import matplotlib.pyplot as plt
 
-from gradien_optimiser import eqn_err
+from matplotlib import pyplot as plt
+from numpy import linalg as LA
+
 tolerance = 1e-6
 
+# Charger les données des systèmes
 with open("../../ressource/System_of_linear_equations/systems_data_3x3_to_10x10.json", "r") as f:
     systems_data = json.load(f)
 
-def matrice_W(n):
-    W = np.zeros((n, n))
-    for i in range(n):
-        W[i, i] = 1 / 3
-    for i in range(n - 1):
-        W[i, i + 1] = 1 / 3
-        W[i + 1, i] = 1 / 3
-    if n == 10:  # Ajustement cyclique uniquement pour n = 10
-        W[0, 9] = 1 / 3
-        W[9, 0] = 1 / 3
-    return W
+n = 10
+A = 2.0*np.random.rand(n,n)-np.ones((n,n))
+b = 2.0*np.random.rand(n)-np.ones(n)
+X_init = 2.0*np.random.rand(n,n)-np.ones((n,n))
+
+#W = (1/n) * np.ones((n,n))
+
+W = np.zeros((n,n))
+for i in range(n):
+    W[i,i] = 1/3
+for i in range(n-1):
+    W[i,i+1] = 1/3
+    W[i+1,i] = 1/3
+W[0,9] = 1/3
+W[9,0] = 1/3
 
 
-def local_error(A,b,X,W,n):
+def local_error(A,b,X,W):
     err = np.zeros(n)
     for i in range(n):
-        err[i] = abs(np.dot(A[i, :], X[:, i]).item() - b[i])
+        err[i] = abs(np.dot(A[i,:],X[:,i])-b[i])
     disagree = np.zeros(n)
     for i in range(n):
         for j in range(n):
@@ -36,132 +41,94 @@ def local_error(A,b,X,W,n):
                     disagree[i] = dis
     return err, disagree
 
-
-def global_error(A,b,X,n):
+def global_error(A,b,X):
     sol = LA.solve(A,b)
     err = np.zeros(n)
     for i in range(n):
         err[i] = LA.norm(X[:,i]-sol)/LA.norm(sol)
     return err
 
-
 def projection(a,b,x):
     return x-np.dot(np.outer(a,a),x)+b*a
 
 
-def Inertial_Projected_Consensus_Algorithm(A, b, max_iterations=10000):
-    n = len(b)
-    tol = 1e-5
-    eps = 1e-9
 
-    X_init = 2.0 * np.random.rand(n, n) - np.ones((n, n))
+max_iter = 15000
+tol = 1e-5
+eps = 1e-9
+
+eqn_err2 = np.zeros((max_iter+1,n))
+cons_err2 = np.zeros((max_iter+1,n))
+glob_err2 = np.zeros((max_iter+1,n))
+
+def Inertial_Projected_Consensus_Algorithm(A, b, max_iterations=10000, tol=1e-5):
+    iter2 = 0
     X_i = X_init
     Y = np.zeros((n, n))
-    step = np.full(n, float('inf'))
-    W = matrice_W(n).T
+    step = np.zeros(n)
+    for i in range(n):
+        step[i] = float('inf')
     theta = np.zeros(n)
-
-    iter = 0
-    while iter < max_iterations:
-        iter += 1
-
-        # Mise à jour de X
+    while (max(eqn_err2[iter2, :]) > tol or max(cons_err2[iter2, :]) > tol) and (iter2 < max_iter):
+        iter2 += 1
         for i in range(n):
             X_i[:, i] = projection(A[i, :].T, b[i], X_i[:, i])
-        X_i = np.dot(X_i, W)
-
-        # Calcul de Y
+        X_i = np.dot(X_i, W.T)
         for i in range(n):
             Y[:, i] = projection(A[i, :].T, b[i], X_i[:, i])
-        Y = np.dot(Y, W)
-
-        # Calcul de theta et mise à jour de X
+        Y = np.dot(Y, W.T)
         for i in range(n):
             if abs(np.dot(A[i, :], Y[:, i] - X_i[:, i])) < eps:
                 theta[i] = float('inf')
             else:
-                theta[i] = (np.dot(A[i, :], X_i[:, i]) - b[i]).item() / np.dot(A[i, :], X_i[:, i] - Y[:, i]).item()
-
+                theta[i] = (np.dot(A[i, :], X_i[:, i]) - b[i]) / np.dot(A[i, :], X_i[:, i] - Y[:, i])
         for i in range(n):
             for j in range(n):
-                if W[i, j] > 0.0 and eps < theta[j] < step[i]:
+                if W[i, j] > 0.0 and theta[j] > eps and theta[j] < step[i]:
                     step[i] = theta[j]
             if step[i] < float('inf'):
-                #improved the step
-                step[i] = 1.0 / (1 + iter) * step[i]
+                step[i] = 1.5 * step[i]
                 X_i[:, i] = X_i[:, i] + step[i] * (Y[:, i] - X_i[:, i])
+        X_i = np.dot(X_i, W.T)
+        eqn_err2[iter2, :], cons_err2[iter2, :] = local_error(A, b, X_i, W)
+        glob_err2[iter2, :] = global_error(A, b, X_i)
 
-        X_i = np.dot(X_i, W)
+    fig = plt.figure()
+    plt.xlabel("number of iterations")
+    plt.ylabel("global error")
+    plt.yscale('log')
+    for i in range(n):
+        plt.plot(glob_err2[0:iter2, i], label='agent ' + str(i + 1))
+    plt.legend()
+    plt.show()
 
-        # Vérifier la convergence
-        def convergence(inconnue, x_old):
-            return np.linalg.norm(inconnue - x_old) < tolerance
 
+# Exécution pour chaque système
+results = []
 
-        eqn_err, cons_err = local_error(A, b, X_i, W, n)
-        if max(eqn_err) < tol and max(cons_err) < tol:
-            break
-
-    return iter
-
-#color for every systeme
-colors = {
-    3: "red",
-    4: "blue",
-    5: "green",
-    6: "orange",
-    7: "purple",
-    8: "cyan",
-    9: "brown",
-    10: "pink"
-}
-# Stocker les résultats
-condition_numbers = []
-execution_times = []
-matrix_sizes = []  # Taille de la matrice
-point_colors = []  # Couleurs associées à chaque point
-
-# Regrouper les données pour le calcul des moyennes
-average_data = {size: {"condition_numbers": [], "execution_times": []} for size in colors.keys()}
-
-    # Stocker les résultats si le nombre de condition est acceptable
 for idx, system in enumerate(systems_data):
     A = np.array(system["A"])
-    b = np.array(system["b"]).reshape(-1, 1)  # Assurer un vecteur colonne
+    b = np.array(system["b"]).reshape(-1, 1)
     size = A.shape[0]
     condition_number = np.linalg.cond(A)
 
-    # Mesurer le temps d'exécution
-    start_time = time.time()
-    iterations = Inertial_Projected_Consensus_Algorithm(A, b)
-    end_time = time.time()
-    execution_time = end_time - start_time
+    if condition_number < 300:  # Filtrer les systèmes mal conditionnés
+        iter_count, exec_time, solution = Inertial_Projected_Consensus_Algorithm(A, b)
+        results.append({
+            "system_index": idx + 1,
+            "matrix_size": size,
+            "condition_number": condition_number,
+            "iterations": iter_count,
+            "execution_time": exec_time,
+            "solution": solution.flatten().tolist()
+        })
 
-    if condition_number < 300:
-        condition_numbers.append(condition_number)
-        execution_times.append(execution_time)
-        matrix_sizes.append(size)
-        point_colors.append(colors[size])
-        print(f"Système {idx + 1}: Taille={size}, Conditionnement={condition_number:.2f}, "
-              f"Temps={execution_time:.4f}s, Iterations={iterations}")
-
-# Tracer le graphique
-plt.figure(figsize=(10, 6))
-
-# Points individuels
-for size in sorted(colors.keys()):
-    indices = [i for i, s in enumerate(matrix_sizes) if s == size]
-    plt.scatter(
-        [condition_numbers[i] for i in indices],
-        [execution_times[i] for i in indices],
-        color=colors[size],
-        label=f"{size}x{size}",
-        alpha=0.7
-    )
-
-plt.xlabel("Condition number κ(A)")
-plt.ylabel("Execution time (seconds)")
-plt.title("Relationship between the condition number κ(A) and execution time Inertial")
-plt.legend(title="Matrix size")
-plt.grid()
-plt.show()
+# Affichage des résultats
+for result in results:
+    print(f"Système {result['system_index']}:")
+    print(f"  Taille: {result['matrix_size']}x{result['matrix_size']}")
+    print(f"  Nombre de conditionnement: {result['condition_number']:.2f}")
+    print(f"  Nombre d'itérations: {result['iterations']}")
+    print(f"  Temps d'exécution: {result['execution_time']:.4f}s")
+    print(f"  Solution: {result['solution']}")
+    print("true solution" ,np.linalg.solve(A,b))

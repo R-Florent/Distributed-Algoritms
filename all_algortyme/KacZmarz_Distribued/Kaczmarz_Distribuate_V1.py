@@ -47,7 +47,7 @@ def convergence(A, b, unknown):
 
 
 # Algorithme de Kaczmarz avec comptage des itérations
-def Kaczmarz(A, b, max_iterations=1000):
+def Kaczmarz(A, b, max_iterations=30000):
     norms = np.sum(A ** 2, axis=1)  # Pré-calcul des normes
     x = np.random.rand(len(b))  # Initialisation aléatoire
     x_old = np.zeros_like(x)
