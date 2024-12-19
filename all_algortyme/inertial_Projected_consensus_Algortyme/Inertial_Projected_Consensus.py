@@ -1,21 +1,14 @@
-import json
 import numpy as np
-import time
-
-from matplotlib import pyplot as plt
 from numpy import linalg as LA
 
-tolerance = 1e-6
+# Matrix A and vector b
+A = np.array([[4, 1, 2],
+              [3, 5, 1],
+              [1, 1, 3]])
 
-# Charger les données des systèmes
-with open("../../ressource/System_of_linear_equations/systems_data_3x3_to_10x10.json", "r") as f:
-    systems_data = json.load(f)
+b = np.array([4, 7, 3])
 
-n = 10
-A = 2.0*np.random.rand(n,n)-np.ones((n,n))
-b = 2.0*np.random.rand(n)-np.ones(n)
-X_init = 2.0*np.random.rand(n,n)-np.ones((n,n))
-
+n = len(b)
 #W = (1/n) * np.ones((n,n))
 
 W = np.zeros((n,n))
@@ -61,9 +54,10 @@ eqn_err2 = np.zeros((max_iter+1,n))
 cons_err2 = np.zeros((max_iter+1,n))
 glob_err2 = np.zeros((max_iter+1,n))
 
-def Inertial_Projected_Consensus_Algorithm(A, b, max_iterations=10000, tol=1e-5):
+def Inertial_Projected_Consensus_Algorithm(A, b):
+    n=len(b)
+    X_i = 2.0 * np.random.rand(n, n) - np.ones((n, n))
     iter2 = 0
-    X_i = X_init
     Y = np.zeros((n, n))
     step = np.zeros(n)
     for i in range(n):
@@ -92,43 +86,8 @@ def Inertial_Projected_Consensus_Algorithm(A, b, max_iterations=10000, tol=1e-5)
         X_i = np.dot(X_i, W.T)
         eqn_err2[iter2, :], cons_err2[iter2, :] = local_error(A, b, X_i, W)
         glob_err2[iter2, :] = global_error(A, b, X_i)
+        return iter2, X_i
 
-    fig = plt.figure()
-    plt.xlabel("number of iterations")
-    plt.ylabel("global error")
-    plt.yscale('log')
-    for i in range(n):
-        plt.plot(glob_err2[0:iter2, i], label='agent ' + str(i + 1))
-    plt.legend()
-    plt.show()
+solution =Inertial_Projected_Consensus_Algorithm(A, b)
 
-
-# Exécution pour chaque système
-results = []
-
-for idx, system in enumerate(systems_data):
-    A = np.array(system["A"])
-    b = np.array(system["b"]).reshape(-1, 1)
-    size = A.shape[0]
-    condition_number = np.linalg.cond(A)
-
-    if condition_number < 300:  # Filtrer les systèmes mal conditionnés
-        iter_count, exec_time, solution = Inertial_Projected_Consensus_Algorithm(A, b)
-        results.append({
-            "system_index": idx + 1,
-            "matrix_size": size,
-            "condition_number": condition_number,
-            "iterations": iter_count,
-            "execution_time": exec_time,
-            "solution": solution.flatten().tolist()
-        })
-
-# Affichage des résultats
-for result in results:
-    print(f"Système {result['system_index']}:")
-    print(f"  Taille: {result['matrix_size']}x{result['matrix_size']}")
-    print(f"  Nombre de conditionnement: {result['condition_number']:.2f}")
-    print(f"  Nombre d'itérations: {result['iterations']}")
-    print(f"  Temps d'exécution: {result['execution_time']:.4f}s")
-    print(f"  Solution: {result['solution']}")
-    print("true solution" ,np.linalg.solve(A,b))
+print(solution)
