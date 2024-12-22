@@ -6,17 +6,16 @@ import time
 
 from all_algortyme.KacZmarz_Distribued.Kaczmarz_Distribuate_V1 import Kaczmarz
 
-# Création du dossier pour les graphiques
+# Create a folder for storing the graphs
 output_folder = "graphs"
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
-
-# Lire les systèmes depuis le fichier JSON
+# Read the systems from the JSON file
 with open("../../ressource/System_of_linear_equations/systems_data_3x3_to_10x10.json", "r") as f:
     systems_data = json.load(f)
 
-# Couleurs pour chaque taille de matrice
+# Colors for each matrix size
 colors = {
     3: "red",
     4: "blue",
@@ -28,48 +27,49 @@ colors = {
     10: "pink"
 }
 
-# Stocker les résultats
+# Initialize results storage
 condition_numbers = []
 execution_times = []
-matrix_sizes = []  # Taille de la matrice
-point_colors = []  # Couleurs associées à chaque point
+matrix_sizes = []  # Matrix size for each system
+point_colors = []  # Associated colors for each point
 
-# Regrouper les données pour le calcul des moyennes
+# Data for computing averages
 average_data = {size: {"condition_numbers": [], "execution_times": []} for size in colors.keys()}
 
+# Iterate through each linear system in the JSON file
 for idx, system in enumerate(systems_data):
-    A = np.array(system["A"])
-    b = np.array(system["b"])
-    size = A.shape[0]
-    condition_number = np.linalg.cond(A)
+    A = np.array(system["A"])  # Extract the matrix A
+    b = np.array(system["b"])  # Extract the vector b
+    size = A.shape[0]          # Get the matrix size
+    condition_number = np.linalg.cond(A)  # Compute the condition number of the matrix A
 
-    # Mesurer le temps d'exécution de l'algorithme
+    # Measure the execution time of the Kaczmarz algorithm
     start_time = time.time()
-    solution, iterations = Kaczmarz(A, b)
+    solution, iterations = Kaczmarz(A, b)  # Replace this with your own algorithm if desired
     end_time = time.time()
 
     execution_time = end_time - start_time
 
-    # Stocker les résultats si le nombre de condition est acceptable
+    # Store results only if the condition number is acceptable (below 500)
     if condition_number < 500:
         condition_numbers.append(condition_number)
         execution_times.append(execution_time)
         matrix_sizes.append(size)
         point_colors.append(colors[size])
 
-        # Ajouter les données pour le calcul des moyennes
+        # Add data for computing averages
         average_data[size]["condition_numbers"].append(condition_number)
         average_data[size]["execution_times"].append(execution_time)
 
-    # # Affichage des résultats
-    # print(f"Système {idx + 1}:")
-    # print(f"Taille de la matrice: {size}x{size}")
+    # # Uncomment below to display results for each system
+    # print(f"System {idx + 1}:")
+    # print(f"Matrix size: {size}x{size}")
     # print(f"Solution: {solution}")
-    # print(f"Nombre d'itérations: {iterations}")
-    # print(f"Nombre de condition κ(A): {condition_number:.2f}")
-    # print(f"Temps d'exécution: {execution_time:.4f} secondes\n")
+    # print(f"Iterations: {iterations}")
+    # print(f"Condition number κ(A): {condition_number:.2f}")
+    # print(f"Execution time: {execution_time:.4f} seconds\n")
 
-# Calcul des moyennes
+# Compute the averages for each matrix size
 average_condition_numbers = []
 average_execution_times = []
 matrix_sizes_avg = []
@@ -83,10 +83,10 @@ for size in sorted(average_data.keys()):
         average_execution_times.append(avg_time)
         matrix_sizes_avg.append(size)
 
-# Tracer le graphique
+# Plot the graph
 plt.figure(figsize=(10, 6))
 
-# Points individuels
+# Individual points
 for size in sorted(colors.keys()):
     indices = [i for i, s in enumerate(matrix_sizes) if s == size]
     plt.scatter(
@@ -97,9 +97,10 @@ for size in sorted(colors.keys()):
         alpha=0.7
     )
 
+# Add labels and title to the graph
 plt.xlabel("Condition number κ(A)")
 plt.ylabel("Execution time (seconds)")
-plt.title("Relationship between the condition number κ(A) and execution time Kaczmarz_Distributed")
+plt.title("Relationship between the condition number κ(A) and execution time (Kaczmarz Distributed)")
 plt.legend(title="Matrix size")
 plt.grid()
 plt.show()
