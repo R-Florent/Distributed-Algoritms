@@ -47,21 +47,19 @@ def convergence(A, b, unknown):
 
 
 # Algorithme de Kaczmarz avec comptage des itérations
-def Kaczmarz(A, b, max_iterations=30000):
+def Kaczmarz(A, b, max_iterations=30000,x=np.random.rand(len(b))):
+    tab_err = []
+    true_solution = np.linalg.solve(A, b)
+    x_erro_Kaczmarz=[]
     norms = np.sum(A ** 2, axis=1)  # Pré-calcul des normes
-    x = np.random.rand(len(b))  # Initialisation aléatoire
+      # Initialisation aléatoire
     x_old = np.zeros_like(x)
     iteration = 0
 
-    for iteration in range(max_iterations):
+    while not convergence(A, b, x_old) and iteration < max_iterations:
+        x_erro_Kaczmarz.append(np.linalg.norm(true_solution - x))
         x_old[:] = x
         momentum =  beta * (x - x_old)
         x = Kaczmarz_one_loop(A, b, x, norms) #+ momentum
         iteration = iteration + 1
-        if convergence(A, b, x):
-            return x, iteration + 1
-
-    return x, max_iterations,#iteration
-
-#solution = Kaczmarz(A, b, 10000)
-#print("Kaczmar solution",solution,"true solution",np.linalg.solve(A,b))
+    return x, iteration , x_erro_Kaczmarz
