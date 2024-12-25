@@ -24,7 +24,7 @@ def Comunication_cycle_graphe (n):
     W[n - 1, 0] = 1 / 3
     # Symmetric weights for periodic neighbors-
 
-tolerance = 1e-6
+tolerance = 1e-4
 alpha = 1  # Relaxation parameter (to be adjusted as needed)
 beta = 0.5  # Momentum parameter (to be adjusted as needed)
 
@@ -70,21 +70,16 @@ def Kaczmarz(A, b, max_iterations=30000):
     x_old = np.zeros_like(x)
     iteration = 0
 
-    for iteration in range(max_iterations):
+    while not convergence(A, b, x_old):
         x_old[:] = x
         momentum =  beta * (x - x_old)
         x = Kaczmarz_one_loop(A, b, x, norms) #+ momentum
         iteration = iteration + 1
         tab_err.append(np.linalg.norm(true_solution - x))
 
-        if convergence(A, b, x):
-            plt.plot(range(len(tab_err)), tab_err)
-            plt.show()
-            return x, iteration + 1
-
     plt.plot(range(len(tab_err)),tab_err)
     plt.show()
-    return x, max_iterations,#iteration
+    return x, iteration,#iteration
 
 
 solution = Kaczmarz(A, b, 10000)
