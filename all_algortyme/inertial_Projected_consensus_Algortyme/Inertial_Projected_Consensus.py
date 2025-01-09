@@ -18,13 +18,13 @@ from numpy.linalg import solve
 # Symmetric weights for periodic neighbors
 
 # Algorithm parameters
-max_iter = 15000
+
 tol = 1e-5
 eps = 1e-9
 
  # Par exemple
 
-def Inertial_Projected_Consensus_Algorithm(A, b):
+def Inertial_Projected_Consensus_Algorithm(A, b,max_iter,X_i):
     n = len(b)
     W = star_graph(n)
 
@@ -77,7 +77,7 @@ def Inertial_Projected_Consensus_Algorithm(A, b):
 
 
     """Solve linear system iteratively using inertial projected consensus."""
-    X_i = 2.0 * np.random.rand(n, n) - np.ones((n, n))  # Random initialization
+    #X_i = 2.0 * np.random.rand(n, n) - np.ones((n, n))  # Random initialization
     iter2 = 0
     Y = np.zeros((n, n))
     step = np.zeros(n)
