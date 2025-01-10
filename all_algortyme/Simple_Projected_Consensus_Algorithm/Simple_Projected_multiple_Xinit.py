@@ -32,7 +32,7 @@ def global_error(A, b, X_s):
     return np.linalg.norm(np.dot(A, X_s.mean(axis=1)) - b)
 
 
-def projected_consensus_algorithm(A, b, W, X_init, tol=1e-6, max_iter=1000):
+def simple_projected_consensus_algorithm(A, b, W, X_init, max_iter=1000, tol=1e-6):
     """
     Implémente l'algorithme de consensus projeté pour résoudre le système.
 
@@ -76,7 +76,7 @@ def projected_consensus_algorithm(A, b, W, X_init, tol=1e-6, max_iter=1000):
         glob_err1[iter1 - 1] = global_error(A, b, X_s)
 
     print(f"Algorithme convergé en {iter1} itérations avec une erreur globale de {glob_err1[iter1 - 1]:.6f}")
-    return X_s.mean(axis=1),iter1,glob_err1 # Retourne la moyenne des solutions comme consensus final
+    return X_s.mean(axis=1),#glob_err1,iter1 # Retourne la moyenne des solutions comme consensus final
 
 
 # Exemple d'utilisation
@@ -92,6 +92,8 @@ if __name__ == "__main__":
                   [0.25, 0.25, 0.5]])  # Matrice de poids (symétrique et stochastique)
 
     X_init = np.random.rand(A.shape[1], A.shape[0])  # Initialisation aléatoire
-
-    solution = projected_consensus_algorithm(A, b, W, X_init)
+    print(X_init)
+    X_init = np.random.rand(len(b))
+    print(X_init)
+    solution = simple_projected_consensus_algorithm(A, b, W, X_init)
     print("Solution finale :", solution)
