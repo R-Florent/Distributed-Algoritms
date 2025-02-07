@@ -1,5 +1,4 @@
 import numpy as np
-from all_algortyme.KacZmarz_Distribued.Kaczmar_matrice_comunication import true_solution
 
 # Parameters for the algorithm
 tolerance = 1e-6

@@ -3,8 +3,51 @@ import json
 import os
 import matplotlib.pyplot as plt
 import time
+from numpy import linalg as LA
+import copy
+import random
 
-from all_algortyme.KacZmarz_Distribued.Kaczmarz_Distribuate_V1 import Kaczmarz
+#from all_algortyme.KacZmarz_Distribued.Kaczmarz_Distribuate_V1 import Kaczmarz
+#from all_algortyme.algorithms20250119 import randomized_Kaczmarz
+def local_error(A, b, W, X):
+    n = A.shape[0]
+    eqn_error = np.zeros(n)
+    for i in range(n):
+        eqn_error[i] = abs(np.dot(A[i,:],X[:,i])-b[i])
+    cons_error = np.zeros(n)
+    for i in range(n):
+        for j in range(n):
+            if W[i,j] > 0.0:
+                dis = LA.norm(X[:,i]-X[:,j], np.inf)
+                if dis > cons_error[i]:
+                    cons_error[i] = dis
+    return max(eqn_error+cons_error)
+
+
+def projection(a,b,x):
+    # vector a is assumed to be normalized.
+    return x-np.dot(np.outer(a,a),x)+b*a
+
+
+def projected_consensus(A, b, W, X_init, max_iter, tol):
+    n = A.shape[0]
+    X = copy.copy(X_init)
+    Y = np.zeros((n, n))
+    err = local_error(A, b, W, X)
+    err_history = [err]
+    iter = 1
+    while (err > tol) and (iter <= max_iter):
+        # projection onto the hyperplane
+        for i in range(n):
+            Y[:, i] = projection(A[i, :], b[i], X[:, i])
+        # computation of the weighted average of the solutions in the neighborhood
+        X = np.dot(Y, W.T)
+        # evaluation of the error
+        err = local_error(A, b, W, X)
+        err_history.append(err)
+        iter = iter + 1
+
+    return X, iter, err_history
 
 # Création du dossier pour les graphiques
 output_folder = "graphs"
@@ -25,8 +68,9 @@ colors = {
     7: "purple",
     8: "cyan",
     9: "brown",
-    10: "pink"
 }
+
+
 
 # Stocker les résultats
 condition_numbers = []
@@ -40,12 +84,18 @@ average_data = {size: {"condition_numbers": [], "execution_times": []} for size 
 for idx, system in enumerate(systems_data):
     A = np.array(system["A"])
     b = np.array(system["b"])
+    n = len(b)
     size = A.shape[0]
     condition_number = np.linalg.cond(A)
+    W = np.ones((n, n)) / n
+    X_init = 2.0 * np.random.rand(n, n) - np.ones((n, n))
+    max_iterations = 100_000
+    tolerance = 1e-3
+    extension_ratio = 1.2
 
     # Mesurer le temps d'exécution de l'algorithme
     start_time = time.time()
-    solution, iterations = Kaczmarz(A, b)
+    X2, iter2, err2 = projected_consensus(A, b, W, X_init,max_iterations , tolerance)
     end_time = time.time()
 
     execution_time = end_time - start_time
@@ -99,7 +149,7 @@ for size in sorted(colors.keys()):
 
 plt.xlabel("Condition number κ(A)")
 plt.ylabel("Execution time (seconds)")
-plt.title("Relationship between the condition number κ(A) and execution time Kaczmarz_Distributed")
+plt.title("Relationship between the condition number κ(A) and execution time Projected_consensus")
 plt.legend(title="Matrix size")
 plt.grid()
 plt.show()

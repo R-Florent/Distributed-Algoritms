@@ -65,7 +65,7 @@ def simple_projected_consensus_algorithm(A, b, W, X_init, max_iter=1000, tol=1e-
 
         # Mise à jour locale
         for i in range(n):
-            X_s[:, i] = projection(A[i, :], b[i], X_s[:, i])
+             X_s[:, i] = projection(A[i, :], b[i], X_s[:, i])
 
         # Consensus
 

@@ -20,24 +20,15 @@ def projection(b_i, c_i, x):
 
 
 # =============================
-# Matrice de communication
-# =============================
-def generate_weight_matrix(n):
-    """
-    Génère une matrice de communication symétrique (étoile, chaîne, ou autre).
-    """
-    W = np.ones((n, n)) / n  # Matrice uniformément pondérée
-    return W
-
-
-# =============================
 # Algorithme de consensus projeté
 # =============================
-def simple_projected_consensus(A, b, X_init, W, max_iter=1000, tol=1e-6):
+def simple_projected_consensus(A, b, x_init, W, max_iter=1000, tol=1e-6):
     """
     Algorithme simple de consensus projeté pour résoudre Ax = b.
     """
+
     n = len(b)  # Nombre d'agents
+    X_init = np.tile(x_init, (n, 1)).T
     iter1 = 0
     X_s = X_init.copy()
     true_solution = np.linalg.solve(A, b)
@@ -71,15 +62,17 @@ def simple_projected_consensus(A, b, X_init, W, max_iter=1000, tol=1e-6):
     return X_s, eqn_err, cons_err, x_erro_simple_projected_consensus , iter1
 
 
-A = np.array([[4, 1, 2],
-              [3, 5, 1],
-              [1, 1, 3]])
-
-b = np.array([4, 7, 3])
-n = len(b)
-X_init = np.random.rand(len(A[0]), n)
-W = np.ones((n, n)) / n
-
-X_s, eqn_err, cons_err, tab_erro,iteration = simple_projected_consensus(A, b, X_init, W)
-
-print(X_s, eqn_err, cons_err, tab_erro, iteration)
+# A = np.array([[4, 1, 2],
+#               [3, 5, 1],
+#               [1, 1, 3]])
+#
+# b = np.array([4, 7, 3])
+# n = len(b)
+# x_init = np.random.rand(len(A[0]))
+#
+#
+# W = np.ones((n, n)) / n
+#
+# X_s, eqn_err, cons_err, tab_erro,iteration = simple_projected_consensus(A, b, x_init, W)
+#
+# #print(X_s, eqn_err, cons_err, tab_erro, iteration)

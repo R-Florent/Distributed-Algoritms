@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from Comunication_matrix import *
-from numpy.linalg import solve
 
 # Matrix A and vector b
 # A = np.array([[4, 1, 2],
@@ -24,14 +23,14 @@ eps = 1e-9
 
  # Par exemple
 
-def Inertial_Projected_Consensus_Algorithm(A, b,max_iter,X_i):
+def Inertial_Projected_Consensus_Algorithm(A, b,max_iter,x_init):
     n = len(b)
     W = star_graph(n)
 
     eqn_err2 = np.zeros((max_iter + 1, n))
     cons_err2 = np.zeros((max_iter + 1, n))
     glob_err2 = np.zeros((max_iter + 1, n))
-
+    X_i = np.tile(x_init, (n, 1)).T
     def local_error(A, b, X, W):
         """Compute local error and disagreement for consensus."""
         err = np.zeros(n)
@@ -121,10 +120,17 @@ def Inertial_Projected_Consensus_Algorithm(A, b,max_iter,X_i):
 
 
 
+A = np.array([[4, 1, 2],
+              [3, 5, 1],
+              [1, 1, 3]])
 
-# Run the algorithm
-#iterations, solution = Inertial_Projected_Consensus_Algorithm(A, b)
+b = np.array([4, 7, 3])
 
-# Direct solution using LA.solve
-#direct_solution = np.linalg.solve(A, b)
-#print(iterations,solution)
+X_init = np.random.rand(A.shape[1], A.shape[0])
+
+#Run the algorithm
+iterations, solution = Inertial_Projected_Consensus_Algorithm(A, b,1000,X_init)
+
+#Direct solution using LA.solve
+direct_solution = np.linalg.solve(A, b)
+print(iterations,solution)

@@ -25,7 +25,6 @@ colors = {
     7: "purple",
     8: "cyan",
     9: "brown",
-    10: "pink"
 }
 
 # Stocker les résultats

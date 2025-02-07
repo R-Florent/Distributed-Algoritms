@@ -38,4 +38,4 @@ def visualize_graph(W):
     nx.draw(G, with_labels=True, node_color='lightblue', node_size=500)
     plt.show()
 
-#visualize_graph(star_graph(5))
+visualize_graph(complete_graph(5))
